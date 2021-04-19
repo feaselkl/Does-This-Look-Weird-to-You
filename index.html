@@ -1,0 +1,637 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Catallaxy Services | Does This Look Weird to You?</title>
+
+		<link rel="stylesheet" href="../reveal.js/dist/reset.css">
+		<link rel="stylesheet" href="../reveal.js/dist/reveal.css">
+		<link rel="stylesheet" href="../reveal.js/dist/theme/black.css" id="theme">
+		<link rel="stylesheet" href="../WebsiteAssets/mods.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="../reveal.js/plugin/highlight/monokai.css" id="highlight-theme">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h2>Does This Look Weird to You?</h2>
+					<h3>An Introduction to Anomaly Detection</h3>
+					
+					<a href="https://www.catallaxyservices.com">Kevin Feasel</a> (<a href="https://twitter.com/feaselkl">@feaselkl</a>)<br />
+					<a href="https://csmore.info/on/anomalies">https://csmore.info/on/anomalies</a>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Who Am I?  What Am I Doing Here?</h3>
+					<div class="container">
+						<div class="col">
+							<table class="whoami">
+								<tr>
+									<td><a href="https://csmore.info"><img src="../WebsiteAssets/Logo.png" height="100" /></a></td>
+									<td nowrap><a href="https://csmore.info">Catallaxy Services</a></td>
+								</tr>
+								<tr>
+									<td><a href="https://curatedsql.com"><img src="../WebsiteAssets/CuratedSQLLogo.png" height="100" /></a></td>
+									<td nowrap><a href="https://curatedsql.com">Curated SQL</a></td>
+								</tr>
+								<tr>
+									<td><a href="https://www.apress.com/us/book/9781484254608"><img src="../WebsiteAssets/PolyBaseRevealed.png" height="120" /></a></td>
+									<td nowrap><a href="https://www.apress.com/us/book/9781484254608">PolyBase Revealed</a></td>
+								</tr>
+							</table>
+						</div>
+						<div class="col">
+							<a href="http://www.twitter.com/feaselkl"><img src="../WebsiteAssets/HeadShot.jpg" height="358" width="315" /></a>
+							<br />
+							<a href="http://www.twitter.com/feaselkl">@feaselkl</a>
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/motivation.jpg" data-background-opacity="0.2">
+					<h3>Motivation</h3>
+					
+					<p>My goals in this talk:</p>
+					
+					<ul>
+						<li>Explain the concept of anomalies.</li>
+						<li>Review techniques for detecting anomalies.</li>
+						<li>Build an anomaly detector in .NET.</li>
+						<li>Use the Azure Cognitive Services anomaly detector.</li>
+					</ul>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Agenda</h3>
+					
+					<ol>
+						<li class="active">What is an Anomaly?</li>
+						<li>Data Set Considerations</li>
+						<li>Techniques for Tracking Anomalies</li>
+						<li>Building an Anomaly Detector</li>
+						<li>Using the Azure Cognitive Services Anomaly Detector</li>
+					</ol>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/questions.jpg" data-background-opacity="0.2">
+					<h3>What is an Anomaly?</h3>
+					
+					<p>An anomaly is, at its core, an outlier:  something which is sufficiently different from the norm to merit interest.  But there are several conceptual definitions of anomalies.  We’ll break them into two categories:</p>
+					
+					<ol>
+						<li>General concepts</li>
+						<li>Technical definitions</li>
+					</ol>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>General Concepts</h3>
+					
+					<div class="container">
+						<div class="col">
+							<p>The non-technical definition of an anomaly is essentially “I’ll know it when I see it.”  This can get muddled at the edges, but works really well because humans are great at pattern matching and picking out things which look dissimilar.</p>
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/outlier.jpg" height="450" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/philosophy.jpg" data-background-opacity="0.2">
+					<h3>The Gestalt School</h3>
+					
+					<p>One of the best collections of information about how we process things visually is the Gestalt school of psychology.  Their key insight is that our minds apply known and expected patterns to what our eyes see.</p>
+
+					<p>This leads to a few key Gestalt principles we can take advantage of.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Law of Closure</h3>
+					
+					<p>We naturally fill in gaps and turn partial shapes into whole shapes.</p>
+
+					<img src="presentation/assets/image/LawOfClosure.png" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Law of Common Region</h3>
+					
+					<p>We group things together based on their being inside or outside of a region.</p>
+
+					<img src="presentation/assets/image/LawOfCommonRegion.png" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Figure / Ground</h3>
+					
+					<p>We prefer to see the foreground rather than the background.  Exceptions do exist, such as Rubin's vase:</p>
+
+					<div class="container">
+						<div class="col">
+							<img src="presentation/assets/image/FigureGround.png" height="450" />
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/FigureGround2.png" height="450" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Law of Proximity</h3>
+					
+					<p>Things which are nearer to each other are considered part of the same grouping, and "abnormal" separation creates new groups in our minds.</p>
+
+					<img src="presentation/assets/image/LawOfProximity.png" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Similarity</h3>
+					
+					<p>We group things together based on color, shape, and size.</p>
+
+					<img src="presentation/assets/image/LawOfSimilarity.png" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Continuity</h3>
+					
+					<p>We want to follow the smoothest path when viewing lines.</p>
+
+					<img src="presentation/assets/image/Continuity.png" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Symmetry and Order</h3>
+					
+					<p>We perceive ambiguous shapes in as simple a manner as possible.</p>
+
+					<img src="presentation/assets/image/SymmetryAndOrder.png" height="450" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>How This Applies</h3>
+					
+					<div class="container">
+						<div class="col">
+							<p>Because humans are pattern-matchers who try to apply fairly simple heuristics to visual inputs, we tend to see things that aren’t there.  People can take advantage of this with optical illusions, but it also lets us make cogent observations.</p>
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/PointsScored.png" height="450" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>How This Applies</h3>
+					
+					<div class="container">
+						<div class="col">
+							<p>Our eyes try to fit a line to the scatterplot and tell us direction and magnitude.  And they also make us wonder about those two outliers dragging down our best-fit line.</p>
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/PointsScoredLine.png" height="450" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/dictionary.jpg" data-background-opacity="0.2">
+					<h3>Technical Definitions</h3>
+					
+					<p>A layman’s concept of anomalies is great, but it is ambiguous.  Some things which might look strange actually aren’t anomalous behavior, whereas some anomalies might look reasonable from a first glance.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Anomalies on a Fitted Distribution</h3>
+					
+					<img src="presentation/assets/image/AnomaliesOnDistribution.png" height="550" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Anomalies on a Box Plot</h3>
+					
+					<img src="presentation/assets/image/BoxPlot.png" height="450" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Anomalies on a Process Control Chart</h3>
+					
+					<div class="container">
+						<div class="col">
+							<p>Our eyes try to fit a line to the scatterplot and tell us direction and magnitude.  And they also make us wonder about those two outliers dragging down our best-fit line.</p>
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/ProcessControlChart.png" height="450" />
+						</div>					
+					</div>
+				</section>				
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Agenda</h3>
+					
+					<ol>
+						<li>What is an Anomaly?</li>
+						<li class="active">Data Set Considerations</li>
+						<li>Techniques for Tracking Anomalies</li>
+						<li>Building an Anomaly Detector</li>
+						<li>Using the Azure Cognitive Services Anomaly Detector</li>
+					</ol>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Characteristics of Good Data Sets</h3>
+					
+					<p>When hunting for anomalies, we want data sets which have the following properties:</p>
+					
+					<ul>
+						<li>One numeric feature to measure</li>
+						<li>At least 30 data points, and preferably 60-90</li>
+						<li>At least one full cycle of behavior, and preferably more</li>
+					</ul>
+
+					<img src="presentation/assets/image/TimeSeriesDataset.png" />
+				</section>
+				
+				<section data-background-image="presentation/assets/background/time.jpg" data-background-opacity="0.2">
+					<h3>Is Time Series Data Required?</h3>
+					
+					<p>Betteridge’s Law of Headlines says no.</p>
+					
+					<p>Time series data is used extremely frequently for tracking anomalies because anomalies tend to be temporal in nature.  But you can use the same techniques when looking at cohorts within a given time frame.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Is Time Series Data Required?</h3>
+					
+					<div class="container">
+						<div class="col">
+							<p>This data was all collected in one time period, and yet we can envision a way to detect anomalies.</p>
+							<p>In this case, the assumption is that all members in a cohort should have the same operation function.</p>
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/PointsScoredLine.png" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Agenda</h3>
+					
+					<ol>
+						<li>What is an Anomaly?</li>
+						<li>Data Set Considerations</li>
+						<li class="active">Techniques for Tracking Anomalies</li>
+						<li>Building an Anomaly Detector</li>
+						<li>Using the Azure Cognitive Services Anomaly Detector</li>
+					</ol>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/monkey-thinking.jpg" data-background-opacity="0.2">
+					<h3>Intuition on Techniques</h3>
+					
+					<p>There are dozens of anomaly detection techniques available to us.  Some commonalities among techniques are:</p>
+					
+					<ul>
+						<li>Points clustered near to each other are less likely to be anomalous</li>
+						<li>There tend to be few outliers, so we can isolate those</li>
+						<li>With time series data, point-to-point changes are usually not drastic (given some variance) -- predictability is possible</li>
+						<li>Trends and seasonality may affect analysis -- we need to remove those before performing checks</li>
+					</ul>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Standard Deviations</h3>
+					
+					<p>The standard deviation is a calculation of variance in our data.</p>
+
+					<img src="presentation/assets/image/StandardDeviation.png" height="450" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Standard Deviations</h3>
+					
+					<div class="container">
+						<div class="col">
+							<p>For normal distributions:</p>
+							
+							<ul>
+								<li>68% of values are within 1 standard deviation of the mean</li>
+								<li>95% of values are within 2 standard deviations of the mean</li>
+								<li>99.7% of values are within 3 standard deviations of the mean</li>
+							</ul>
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/StandardDeviation2.png" height="500" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/abacus.jpg" data-background-opacity="0.2">
+					<h3>The Downside to Standard Deviation</h3>
+					
+					<p>Standard deviation is sensitive to outliers.</p>
+					
+					<p><code>stdev({9.1, 8.4, 7.3, 8.2, 9.3, 9.6}) = 0.85.</code></p>
+					<p><code>Mean = 8.65</code></p>
+					<p><code>stdev({ 9.1, 8.4, 7.3, 8.2, 9.3, 9.6, 1.9}) = 2.67.</code></p>
+					<p><code>Mean = 7.69</code></p>
+					
+					<p>One outlier increases standard deviation considerably and causes us to ignore otherwise-abnormal values like 5.1.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/clouds-sunrise.jpg" data-background-opacity="0.2">
+					<h3>Fixing Standard Deviation:  MAD</h3>
+					
+					<p>Median Absolute Deviation is a <strong>robust</strong> statistic:  it can handle a limited number of outliers without breaking down.</p>
+					
+					$MAD = median(|X_i - \widetilde X|)$
+					
+					<p><code>X = {9.1, 8.4, 7.3, 8.2, 9.3, 9.6}.  Median = 8.75</code></p>
+					<p><code>MAD = med({0.35, 0.35, 1.45, 0.55, 0.55, 0.85}) = 0.55.</code></p>
+					<p><code>X2 = {9.1, 8.4, 7.3, 8.2, 9.3, 9.6, 1.9}).  Median = 8.4</code></p>
+					<p><code>MAD = med({0.7, 0, 1.1, 0.2, 0.9, 1.2, 6.5}) = 0.9.</code></p>
+					
+					<p>3 * MAD is a good rule of thumb.  Both of these would catch 5.1 as an outlier value.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Differences from Trend</h3>
+					
+					<p>Suppose we have a trend with an anomalous jump.  How do we separate the anomaly increase from the trend?</p>
+
+					<img src="presentation/assets/image/DifferencesFromTrend.png" height="450" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Differences from Trend</h3>
+					
+					<p>De-trend:  fit the data with a line...</p>
+
+					<img src="presentation/assets/image/DeTrend.png" height="450" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Differences from Trend</h3>
+					
+					<p>De-trend:  fit the data with a line and track the difference from the line.</p>
+					<p><br /></p>
+					<img src="presentation/assets/image/DeTrend.png" style="transform:rotate(0.07turn);" height="350" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Changepoint Detection</h3>
+					
+					<p>Changepoint detection looks for abrupt shifts in time series data.</p>
+
+					<img src="presentation/assets/image/ChangepointDetection.png" height="450" />
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Differences</h3>
+					
+					<div class="container">
+						<div class="col">
+							<p>Another common technique is to measure the difference between points and perform statistical analysis on those <strong>differences</strong>.</p>
+
+							<p>We can perform all of the same analyses on deltas that we do on raw values.</p>
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/Deltas.png" height="500" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Agenda</h3>
+					
+					<ol>
+						<li>What is an Anomaly?</li>
+						<li>Data Set Considerations</li>
+						<li>Techniques for Tracking Anomalies</li>
+						<li class="active">Building an Anomaly Detector</li>
+						<li>Using the Azure Cognitive Services Anomaly Detector</li>
+					</ol>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/package.jpg" data-background-opacity="0.2">
+					<h3>Options</h3>
+					
+					<p>Here are a few examples of pre-written packages for anomaly detection:</p>
+					
+					<ul>
+						<li><a href="https://cran.r-project.org/web/packages/anomalize/index.html">Anomalize</a> (R)</li>
+						<li><a href="https://github.com/paullo0106/prophet_anomaly_detection">Time-series Anomaly Detection</a> with <a href="https://cran.r-project.org/web/packages/prophet/">Prophet</a> by Facebook (R)</li>
+						<li><a href="https://github.com/twitter/AnomalyDetection">AnomalyDetection</a> by Twitter (R)</li>
+						<li><a href="https://cran.r-project.org/web/packages/anomaly/">anomaly</a> (R)</li>
+						<li><a href="https://adtk.readthedocs.io/en/stable/">Anomaly Detection Toolkit</a> (Python)</li>
+						<li><a href="https://pyod.readthedocs.io/en/latest/">PyOD</a> (Python)</li>
+						<li><a href="https://github.com/dotnet/machinelearning">ML.NET</a> (.NET)</li>
+						<li><a href="https://docs.microsoft.com/en-us/azure/cognitive-services/anomaly-detector/overview">Azure Cognitive Services Anomaly Detector</a> (Multi)</li>
+					</ul>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Rolling Your Own in .NET</h3>
+					
+					<div class="container">
+						<div class="col">
+							<p>If you decide to build your own anomaly detection process, check out <strong>MathNet</strong>.</p>
+
+							<p>MathNet is a series of .NET libraries for numerical and statistical analysis.</p>
+							
+							<p>This allows you to customize the statistical tests to run and generate results very quickly in C# or F# code.</p>
+						</div>
+						<div class="col">
+							<img src="presentation/assets/image/MathDotNet.png" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/lab.jpg" data-background-opacity="0.2">
+					<h3>Example Tests</h3>
+					
+					<ul>
+						<li>Standard deviations from the mean</li>
+						<li>Median Absolute Deviations (both directions)</li>
+						<li>Unidirectional MAD</li>
+						<li>Deviation from Inter-Quartile Range</li>
+					</ul>
+					
+					<p>Many of these sorts of tests are one-liners with MathNet.Numerics.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/robot.jpg" data-background-opacity="0.2">
+					<h3>ML.NET</h3>
+					
+					<p>Another alternative is to use anomaly detection within the ML.NET package.</p>
+					
+					<p>ML.NET is an actively-developed library for machine learning within .NET and supports both F# and C#.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>ML.NET Setup</h3>
+					
+					<p>Prep steps in Visual Studio Code or at the command line:</p>
+					
+					<pre><code data-line-numbers="|1|3-4|5" data-trim><script type="text/template">
+					dotnet new console --language F# --name BasicAnomalyDetection
+					cd BasicAnomalyDetection
+					dotnet add package Microsoft.ML
+					dotnet add package Microsoft.ML.TimeSeriesDataset
+					dotnet add package XPlot.Plotly
+					</script></code></pre>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/demo.jpg" data-background-opacity="0.2">
+					<h3>Demo Time</h3>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Agenda</h3>
+					
+					<ol>
+						<li>What is an Anomaly?</li>
+						<li>Data Set Considerations</li>
+						<li>Techniques for Tracking Anomalies</li>
+						<li>Building an Anomaly Detector</li>
+						<li class="active">Using the Azure Cognitive Services Anomaly Detector</li>
+					</ol>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/clouds.jpg" data-background-opacity="0.2">
+					<h3>Azure Cognitive Services Anomaly Detector API</h3>
+					
+					<p>The Azure Cognitive Services Anomaly Detector API allows you to perform anomaly detection from any language which supports hitting REST APIs.</p>
+					
+					<p>Steps:</p>
+					
+					<ol>
+						<li>Create an Anomaly Detector resource in Azure</li>
+						<li>Save the Anomaly Detector key and endpoint somewhere like environment variables</li>
+						<li>Create an application and work with the API</li>
+					</ol>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Anomaly Detector API Setup</h3>
+					
+					<div class="container">
+						<div class="col">
+							<img src = "presentation/assets/image/CognitiveServicesCreateAnomalyDetection.png" />
+						</div>
+						<div class="col">
+							<img src = "presentation/assets/image/CreateAnomalyDetector.png" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Anomaly Detector API Setup</h3>
+					
+					<div class="container">
+						<div class="col">
+							<img src = "presentation/assets/image/GetEndpointAndKey.png" />
+						</div>
+						<div class="col">
+							<img src = "presentation/assets/image/SaveEnvironmentVariables.png" />
+						</div>					
+					</div>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Demonstrating the Anomaly Detector API</h3>
+					
+					<img src = "presentation/assets/image/AzureAnomalyDetectionDemo.png" height="475" />
+					
+					<p><a href="https://algoevaluation.azurewebsites.net/#/">Anomaly Detector demo</a></p>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/demo.jpg" data-background-opacity="0.2">
+					<h3>Demo Time</h3>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/devices.jpg" data-background-opacity="0.2">
+					<h3>Working with the API in .NET</h3>
+
+					<p>Although we have libraries like ML.NET which provide anomaly detection, you can also use the Anomaly Detection API in your C# or F# code.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Cognitive Services Setup</h3>
+					
+					<p>Prep steps in Visual Studio Code or at the command line:</p>
+					
+					<pre><code data-line-numbers="|1|3|4" data-trim><script type="text/template">
+					dotnet new console --language F# --name AzureAnomalyDetection
+					cd AzureAnomalyDetection
+					dotnet add package Microsoft.Azure.CognitiveServices.AnomalyDetector
+					dotnet add package FSharp.Data
+					</script></code></pre>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/demo.jpg" data-background-opacity="0.2">
+					<h3>Demo Time</h3>
+				</section>
+
+				<section data-background-image="presentation/assets/background/wrappingup.jpg" data-background-opacity="0.2">
+					<h3>Wrapping Up</h3>
+
+					<p>Over the course of this talk, we have looked at the concept of anomalies, some techniques for detecting them, and .NET packages to make it easy.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
+					<h3>Wrapping Up</h3>
+					
+					<p>
+						To learn more, go here:
+						<br />
+						<a href="https://csmore.info/on/anomalies">https://csmore.info/on/anomalies</a>
+					</p>
+					<br />
+					<p>
+						And for help, contact me:
+						<br />
+						<a href="mailto:feasel@catallaxyservices.com">feasel@catallaxyservices.com</a> | <a href="https://www.twitter.com/feaselkl">@feaselkl</a>
+					</p>
+					<br />
+					<p>
+						Catallaxy Services consulting:
+						<br />
+						<a href="https://csmore.info/contact">https://CSmore.info/on/contact</a>
+					</p>
+				</section>
+			</div>
+		</div>
+
+		<script src="../reveal.js/dist/reveal.js"></script>
+		<script src="../reveal.js/plugin/zoom/zoom.js"></script>
+		<script src="../reveal.js/plugin/notes/notes.js"></script>
+		<script src="../reveal.js/plugin/search/search.js"></script>
+		<script src="../reveal.js/plugin/markdown/markdown.js"></script>
+		<script src="../reveal.js/plugin/math/math.js"></script>
+		<script src="../reveal.js/plugin/menu/menu.js"></script>
+		<script src="../reveal.js/plugin/highlight/highlight.js"></script>
+		<script src="../reveal.js/plugin/chart/Chart.min.js"></script>
+		<script src="../reveal.js/plugin/chart/plugin.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				width: '70%',
+				controls: true,
+				progress: true,
+				center: true,
+				hash: true,
+				transition: 'fade',
+				
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight, RevealMath, RevealMenu, RevealChart ]
+			});
+		</script>
+	</body>
+</html>

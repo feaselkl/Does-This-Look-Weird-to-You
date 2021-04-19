@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <Target Name="CopyDataFile" AfterTargets="AfterBuild">
+    <Copy SourceFiles="GME.csv" DestinationFolder="$(OutDir)" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Data" Version="4.0.1" />
+    <PackageReference Include="Microsoft.Azure.CognitiveServices.AnomalyDetector" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>
