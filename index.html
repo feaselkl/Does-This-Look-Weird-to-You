@@ -334,12 +334,33 @@
 					
 					<p>Standard deviation is sensitive to outliers.</p>
 					
-					<p><code>stdev({9.1, 8.4, 7.3, 8.2, 9.3, 9.6}) = 0.85.</code></p>
+					<p><code>stdev({7.3, 8.2, 8.4, 9.1, 9.3, 9.6}) = 0.85.</code></p>
 					<p><code>Mean = 8.65</code></p>
-					<p><code>stdev({ 9.1, 8.4, 7.3, 8.2, 9.3, 9.6, 1.9}) = 2.67.</code></p>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/abacus.jpg" data-background-opacity="0.2">
+					<h3>The Downside to Standard Deviation</h3>
+					
+					<p>stdev = 0.85, mean = 8.65.</p>
+					<p>Now let's add one more datapoint:</p>
+					
+					<p><code>stdev({ 7.3, 8.2, 8.4, 9.1, 9.3, 9.6, <span class="problem">1.9</span>}) = 2.67.</code></p>
 					<p><code>Mean = 7.69</code></p>
 					
-					<p>One outlier increases standard deviation considerably and causes us to ignore otherwise-abnormal values like 5.1.</p>
+					<p>One outlier increases standard deviation considerably.</p>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/abacus.jpg" data-background-opacity="0.2">
+					<h3>The Downside to Standard Deviation</h3>
+					
+					<p>stdev = 2.67, mean = 7.69.</p>
+					<p>This also causes us to ignore otherwise-abnormal values like 5.1:</p>
+					
+					<p><code>95% = mean +/- (2 * stdev)</code></p>
+					<p><code>Original 95% = 8.65 +/- 2*0.85 = [6.95, 10.35]</code></p>
+					<p><code>New 95% = 7.69 +/- 2*2.67 = [2.35, 13.03]</code></p>
+					
+					<p>5.1 was caught by the original model but the new model thinks it's just fine.</p>
 				</section>
 				
 				<section data-background-image="presentation/assets/background/clouds-sunrise.jpg" data-background-opacity="0.2">
@@ -348,13 +369,47 @@
 					<p>Median Absolute Deviation is a <strong>robust</strong> statistic:  it can handle a limited number of outliers without breaking down.</p>
 					
 					$MAD = median(|X_i - \widetilde X|)$
+				</section>
+				
+				<section data-background-image="presentation/assets/background/clouds-sunrise.jpg" data-background-opacity="0.2">
+					<h3>Fixing Standard Deviation:  MAD</h3>
 					
-					<p><code>X = {9.1, 8.4, 7.3, 8.2, 9.3, 9.6}.  Median = 8.75</code></p>
-					<p><code>MAD = med({0.35, 0.35, 1.45, 0.55, 0.55, 0.85}) = 0.55.</code></p>
-					<p><code>X2 = {9.1, 8.4, 7.3, 8.2, 9.3, 9.6, 1.9}).  Median = 8.4</code></p>
+					<p>Using the original dataset from before, let's calculate median and MAD.</p>
+					
+					<p>Eliminate the extremes until you get to the center 1-2 elements.</p>
+					
+					<p><code>X = {7.3, 8.2, 8.4, 9.1, 9.3, 9.6}.  Median = 8.75</code></p>
+					
+					$MAD = median(|X_i - \widetilde X|)$
+					
+					<p><code>MAD = med({1.45, 0.55, 0.35, 0.35, 0.55, 0.85}) = 0.55.</code></p>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/clouds-sunrise.jpg" data-background-opacity="0.2">
+					<h3>Fixing Standard Deviation:  MAD</h3>
+					
+					<p>Median = 8.75, MAD = 0.55</p>
+					<p>Now let's add that outlier:</p>
+
+					<p><code>X2 = {7.3, 8.2, 8.4, 9.1, 9.3, 9.6, 1.9}).  Median = 8.4</code></p>
+					
+					$MAD = median(|X_i - \widetilde X|)$
+					
 					<p><code>MAD = med({0.7, 0, 1.1, 0.2, 0.9, 1.2, 6.5}) = 0.9.</code></p>
+				</section>
+				
+				<section data-background-image="presentation/assets/background/clouds-sunrise.jpg" data-background-opacity="0.2">
+					<h3>Fixing Standard Deviation:  MAD</h3>
+					
+					<p>Old median = 8.75, old MAD = 0.55</p>
+					<p>New median = 8.4, new MAD = 0.9</p>
 					
 					<p>3 * MAD is a good rule of thumb.  Both of these would catch 5.1 as an outlier value.</p>
+					
+					<p><code>8.75 - 3*0.55 = 7.1</code></p>
+					
+					<p><code>8.4 - 3*0.9 = 5.7</code></p>
+					
 				</section>
 				
 				<section data-background-image="presentation/assets/image/Bubbles.jpg" data-background-opacity="0.4">
