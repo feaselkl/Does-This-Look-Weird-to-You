@@ -4,4 +4,4 @@ This repository provides the supporting code for my presentation entitled [Does 
 
 ## Running the Code
 
-In order to run this code, you will need .NET 5 installed on your machine.  In order to run the `AzureAnomalyDetection` project, you will need to set environment variables named `ANOMALY_DETECTOR_KEY` AND `ANOMALY_DETECTOR_ENDPOINT` before running this.
+In order to run this code, you will need .NET 6 (or later) installed on your machine.  In order to run the `AzureAnomalyDetection` project, you will need to set environment variables named `ANOMALY_DETECTOR_KEY` AND `ANOMALY_DETECTOR_ENDPOINT` before running this.
